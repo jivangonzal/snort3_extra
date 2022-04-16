@@ -89,35 +89,48 @@ void Sunlit::eval(Packet* p)
 {
 
     torch::jit::script::Module module;
-    //try {
+    try {
+        std::string pytorch_model = "/home/jigonzal/traced_resnet_model.pt";
         // Deserialize the ScriptModule from a file using torch::jit::load().
-        module = torch::jit::load("traced_resnet_model.pt");
-        WarningMessage("ok");
-        return;
+        module = torch::jit::load(pytorch_model);
+    
         // Create a vector of inputs.
         std::vector<torch::jit::IValue> inputs;
         inputs.push_back(torch::ones({1, 3, 224, 224}));
 
         // Execute the model and turn its output into a tensor.
         at::Tensor output = module.forward(inputs).toTensor();
-        std::cout << output.slice(/*dim=*/1, /*start=*/0, /*end=*/5) << '\n';
+        //WarningMessage(output.slice(1, 0, 5));
+        //std::string otext = output.slice(/*dim=*/1, /*start=*/0, /*end=*/5);
 
+        double d1 = output[0][0].item<double>();
+        double d2 = output[0][1].item<double>();
+        double d3 = output[0][2].item<double>();
+        double d4 = output[0][3].item<double>();
+        double d5 = output[0][4].item<double>();
 
-   // }
-  //  catch (const c10::Error& e) {
-  //      WarningMessage("error loading the model");
-        
-   //     return;
-  //  }
-
-    WarningMessage("ok");
-    return;
-    WarningMessage("start");
+        std::string mess = std::to_string(d1) + " " + std::to_string(d2) + " " + std::to_string(d3) + " " + std::to_string(d4) + " " + std::to_string(d5);
+        int n = mess.length();
+ 
+        // declaring character array
+        char char_array[n + 1];
     
+        // copying the contents of the
+        // string to char array
+        strcpy(char_array, mess.c_str());
 
+        WarningMessage(char_array);
+    }
+    catch (const c10::Error& e) {
+        WarningMessage("error loading the model");
+        
+        return;
+    }
+
+    return;
+    
     char buffer[p->pktlen*2+1]; /* one extra for \0 */
 
-    
     if(to_hex(buffer, sizeof(buffer), p->pkt, p->pktlen))
     {
         std::fstream myfile;
@@ -142,7 +155,7 @@ void Sunlit::eval(Packet* p)
 
 static const RuleMap sunlit_rules[] =
 {
-    { SUNLIT_SID, "too much data sent to port" },
+    { SUNLIT_SID, "A suspicious code was detected by Artificial Inteligent inspection" },
     { 0, nullptr }
 };
 
@@ -240,4 +253,3 @@ SO_PUBLIC const BaseApi* snort_plugins[] =
     &sunlit_api.base,
     nullptr
 };
-
